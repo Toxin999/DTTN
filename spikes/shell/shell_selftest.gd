@@ -11,6 +11,9 @@ var _mgr: WindowManager
 
 func _ready() -> void:
 	OS.low_processor_usage_mode = false
+	Flags.reset()
+	# The browser now gates on dial-up; skip the modal for shell tests.
+	NetSim.set_online(true)
 	var desktop := DESKTOP.instantiate()
 	desktop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(desktop)

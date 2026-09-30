@@ -8,6 +8,7 @@ extends Window
 
 signal minimize_requested
 signal maximize_requested
+## Title changes use Window's built-in title_changed signal.
 
 const TITLE_H := 30
 const CAP_W := 30
@@ -86,6 +87,7 @@ func update_title(title: String) -> void:
 	display_title = title
 	if _label:
 		_label.text = title
+	title_changed.emit()
 
 
 func _ready() -> void:

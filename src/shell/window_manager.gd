@@ -79,6 +79,9 @@ func open_app(app_id: String) -> WexpWindow:
 	_windows.append(w)
 
 	var app: Control = load(cfg["script"]).new()
+	if app is AppBase:
+		app.window = w
+		app.manager = self
 	app.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	w.content_parent().add_child(app)
 	if app.has_method("build"):
@@ -93,6 +96,7 @@ func open_app(app_id: String) -> WexpWindow:
 	w.focus_exited.connect(func():
 		w.set_meta("dragging", false)
 		_taskbar.sync_button(w))
+	w.title_changed.connect(func(): _taskbar.sync_button(w))
 
 	_taskbar.add_window_button(w)
 	w.grab_focus()
@@ -217,6 +221,10 @@ func open_dialog(dialog: Window, modal := true) -> Window:
 	dialog.theme = _theme
 	dialog.exclusive = modal
 	add_child(dialog)
+	var vis := _host.get_viewport().get_visible_rect().size
+	dialog.position = Vector2i(
+		int((vis.x - dialog.size.x) / 2.0),
+		int((vis.y - dialog.size.y) / 2.5))
 	_dialogs.append(dialog)
 	dialog.close_requested.connect(func(): close_dialog(dialog))
 	if modal:
@@ -269,6 +277,22 @@ func _regrab_modal_deferred() -> void:
 
 func dialog_count() -> int:
 	return _dialogs.size()
+
+
+func dialogs() -> Array[Window]:
+	return _dialogs
+
+
+## Dial-up modal for the browser. on_result(connected: bool) always runs,
+## even if the caller is freed while the modal is open (caller must guard).
+func dial_up(on_result: Callable) -> DialupModal:
+	var modal := DialupModal.new()
+	modal.setup()
+	modal.finished.connect(func(connected: bool):
+		if on_result.is_valid():
+			on_result.call(connected))
+	open_dialog(modal, true)
+	return modal
 
 
 # ---------------------------------------------------------------- taskbar

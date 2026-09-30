@@ -1,0 +1,23 @@
+{
+  "id": "mapleweb",
+  "name": "Maple Grove WebRing",
+  "pages": {
+    "/index": {
+      "title": "Maple Grove WebRing — index",
+      "blocks": [
+        {"type": "heading", "text": "~ Welcome to the Maple Grove WebRing ~"},
+        {"type": "text", "text": "A ring of personal pages from Maple Grove, WA. [b]Site 3 of 11.[/b]"},
+        {"type": "links", "items": [
+          {"text": "→ Next site (4 of 11)", "url": "site://trailtalk/index"},
+          {"text": "← Previous site (2 of 11)", "url": "site://trailtalk/index"}
+        ]},
+        {"type": "rule"},
+        {"type": "text", "text": "[i]Best viewed at 800x600. Under construction![/i]"}
+      ],
+      "keywords": [
+        {"keyword": "maple grove", "label": "town — WebRing page"},
+        {"keyword": "webring", "label": "personal page ring"}
+      ]
+    }
+  }
+}

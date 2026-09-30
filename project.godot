@@ -21,6 +21,8 @@ config/icon="res://icon.svg"
 
 Settings="*res://src/core/settings.gd"
 WorldClock="*res://src/core/world_clock.gd"
+Flags="*res://src/core/flags.gd"
+NetSim="*res://src/core/net_sim.gd"
 
 [display]
 

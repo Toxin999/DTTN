@@ -1,0 +1,32 @@
+{
+  "id": "trailtalk",
+  "name": "TrailTalk",
+  "pages": {
+    "/index": {
+      "title": "TrailTalk › Trip Reports",
+      "blocks": [
+        {"type": "heading", "text": "TrailTalk — Pacific Northwest outdoors board"},
+        {"type": "text", "text": "Welcome back. 412 members online.\n\nLatest: [url=site://trailtalk/thread/cascade][color=#0645AD]Cascade Ridge day hike — Sat 9/14[/color][/url] (32 replies)\n[url=site://mapleweb/index][color=#0645AD]Maple Grove WebRing — next site[/color][/url]"},
+        {"type": "text", "text": "[color=#666666]Trip Reports · Gear Swap · Trail Conditions · Off Topic[/color]"}
+      ],
+      "keywords": []
+    },
+    "/thread/cascade": {
+      "title": "Cascade Ridge day hike — Sat 9/14",
+      "blocks": [
+        {"type": "heading", "text": "Cascade Ridge day hike — Sat 9/14"},
+        {"type": "text", "text": "[color=#666666]posted by river_kat on 09-02-2002 3:41 PM[/color]\n\nAnyone up for Cascade Ridge next Saturday? Meet at the trailhead lot at 7 AM, I'll bring the map and extra water. Post here if you're coming — we can carpool from the Safeway on 3rd."},
+        {"type": "text", "text": "[color=#666666]sundance_77 on 09-05-2002 11:02 PM[/color]\n\nI'm in. Bringing my new digicam so we better get some good light up there."},
+        {"type": "text", "text": "[color=#666666]river_kat on 09-13-2002 6:20 PM[/color]\n\nWeather looks clear. See everyone at the lot, 7 sharp. Don't wait up!"},
+        {"type": "links", "items": [
+          {"text": "‹ Back to Trip Reports", "url": "site://trailtalk/index"}
+        ]}
+      ],
+      "keywords": [
+        {"keyword": "river_kat", "label": "handle — posted the hike"},
+        {"keyword": "sundance_77", "label": "handle — brought the digicam"},
+        {"keyword": "cascade", "label": "Cascade Ridge trailhead"}
+      ]
+    }
+  }
+}

@@ -84,6 +84,7 @@ func remove_window_button(win: WexpWindow) -> void:
 func sync_button(win: WexpWindow) -> void:
 	var tb: Button = _buttons.get(win)
 	if tb:
+		tb.text = win.display_title
 		tb.button_pressed = win.visible and win.is_active()
 
 

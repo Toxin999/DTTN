@@ -2,6 +2,10 @@ class_name AppBase
 extends Control
 
 ## Base class for app content. Subclasses override build().
+## window/manager are injected by WindowManager before build() runs.
+
+var window: WexpWindow
+var manager: WindowManager
 
 
 func build() -> void:

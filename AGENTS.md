@@ -10,7 +10,8 @@ logs, and light hacking minigames. Godot 4.6, 2D/UI only, GL Compatibility.
 Godot --path .                                             # boot -> desktop
 ./tools/run_tests.sh                                       # all selftests
 Godot --path . --quit-after 700  res://spikes/shell/boot_selftest.tscn
-Godot --path . --quit-after 1400 res://spikes/shell/shell_selftest.tscn
+Godot --path . --quit-after 1600 res://spikes/shell/shell_selftest.tscn
+Godot --path . --quit-after 6000 res://spikes/shell/browser_selftest.tscn
 Godot --path .                   res://spikes/text/spike_text.tscn
 python3 tools/gen_ui_assets.py                             # regenerate UI art
 python3 tools/process_photo.py --self-test                 # photo pipeline
@@ -37,6 +38,13 @@ Dev captures disable `OS.low_processor_usage_mode` so redraws always happen.
   focus back after taskbar/desktop clicks.
 - A new embedded Window auto-focuses during `add_child`, *before* signals can
   be connected — sync focus state explicitly after creating windows.
+- `Window` already defines `close_requested` and `title_changed`; never
+  redeclare them. Avoid overriding native methods (`set_title`, ...) —
+  warnings are treated as errors here.
+- Set `borderless`/`size` on an embedded Window **before** `add_child`, and do
+  not create embedded Windows synchronously inside another window's
+  add_child/build chain — defer with `call_deferred` (the browser dial-up
+  modal does this) or the new window never renders.
 - `RichTextLabel` has no `link_color` theme item in 4.6; wrap links with
   `UiTheme.link(url, text)` for era-styled blue underlined links.
 - The runtime low-processor switch is `OS.low_processor_usage_mode`
@@ -53,9 +61,12 @@ Dev captures disable `OS.low_processor_usage_mode` so redraws always happen.
 
 ```
 scenes/main.tscn          boot -> desktop entry point
-src/core/                 settings (user://settings.cfg), world_clock, ui_theme
-src/shell/                desktop, window_manager, wexp_window, taskbar, start_menu
-src/apps/                 app_base + browser/mail/settings (Phase 1 placeholders)
+src/core/                 settings, world_clock, ui_theme, flags, net_sim (autoloads)
+src/shell/                desktop, window_manager, wexp_window, taskbar, start_menu,
+                          dialup_modal, input_guard
+src/apps/                 app_base + browser (dial-up gating, block renderer,
+                          navigation/history), mail, settings (placeholders)
+content/en/sites/*.json   fake web pages (blocks + keywords + requires flags)
 content/en/               narrative source (style guide lives here)
 tools/                    Pillow generators: UI art, era photo processing
 spikes/                   dev-only selftests + capture helper (spike_text kept)
