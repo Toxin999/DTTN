@@ -13,6 +13,7 @@ config_version=5
 config/name="DetectiveNet"
 config/description="Detective game set inside a fictional 2002 desktop OS."
 run/main_scene="res://scenes/main.tscn"
+run/low_processor_mode=true
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -21,7 +22,7 @@ config/icon="res://icon.svg"
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
+window/stretch/aspect="expand"
 window/subwindows/embed_subwindows=true
 
 [rendering]

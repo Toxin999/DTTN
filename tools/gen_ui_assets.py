@@ -133,25 +133,33 @@ def window_buttons():
             W, H = 21 * SS, 21 * SS
             img = vgrad((W, H), [(0.0, c0), (1.0, c1)])
             gloss(img, 0.5, 60)
-            m = rounded_mask((21, 21), (4, 4, 4, 4))
-            img = img.resize((21, 21), Image.LANCZOS)
-            img.putalpha(m)
-            add_border(img, border)
-            # glyph drawn small on final size, 2px strokes (chunky like the era)
             d = ImageDraw.Draw(img)
             fg = (248, 252, 255) if state != "pressed" else (222, 232, 248)
             sh = (12, 30, 70)
+            s = SS
+
+            def line(x0, y0, x1, y1, color, dx=0, dy=0):
+                d.line([(x0 + dx) * s, (y0 + dy) * s, (x1 + dx) * s, (y1 + dy) * s],
+                       fill=color, width=2 * s)
+
+            def box(x0, y0, x1, y1, color, dx=0, dy=0):
+                d.rectangle([(x0 + dx) * s, (y0 + dy) * s, (x1 + dx) * s, (y1 + dy) * s],
+                            outline=color, width=2 * s)
+
             if glyph == "close":
-                d.line([6, 6, 15, 15], fill=sh, width=2)
-                d.line([15, 6, 6, 15], fill=sh, width=2)
-                d.line([5, 5, 14, 14], fill=fg, width=2)
-                d.line([14, 5, 5, 14], fill=fg, width=2)
+                line(6, 6, 15, 15, sh, 1, 1)
+                line(15, 6, 6, 15, sh, 1, 1)
+                line(6, 6, 15, 15, fg)
+                line(15, 6, 6, 15, fg)
             elif glyph == "min":
-                d.line([5, 16, 15, 16], fill=sh, width=2)
-                d.line([5, 15, 15, 15], fill=fg, width=2)
+                line(5, 15, 15, 15, sh, 1, 1)
+                line(5, 15, 15, 15, fg)
             elif glyph == "max":
-                d.rectangle([6, 5, 14, 13], outline=sh, width=1)
-                d.rectangle([5, 6, 13, 14], outline=fg, width=1)
+                box(6, 5, 14, 13, sh, 1, 1)
+                box(5, 6, 13, 14, fg)
+            img = img.resize((21, 21), Image.LANCZOS)
+            img.putalpha(rounded_mask((21, 21), (4, 4, 4, 4)))
+            add_border(img, border)
             save(img, f"win_{glyph}_{state}.png")
 
 

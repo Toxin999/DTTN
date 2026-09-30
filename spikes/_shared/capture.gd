@@ -8,6 +8,8 @@ extends Node
 
 
 func _ready() -> void:
+	# low processor mode skips redraws when idle — screenshots would hang.
+	OS.low_processor_usage_mode = false
 	await get_tree().create_timer(wait_seconds).timeout
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()

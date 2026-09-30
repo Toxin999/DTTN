@@ -223,6 +223,7 @@ func _spawn_window(title: String, pos: Vector2, size: Vector2, content: Callable
 		_restack_taskbar()
 		_refresh_task(w))
 	w.focus_exited.connect(func():
+		w.set_meta("dragging", false)
 		_apply_active(w, false)
 		_refresh_task(w))
 	return w
@@ -307,7 +308,9 @@ func _build_chrome(w: Window) -> void:
 
 	b_min.pressed.connect(func():
 		w.visible = false
-		_refresh_task(w))
+		w.set_meta("dragging", false)
+		_refresh_task(w)
+		_focus_top_visible())
 	b_max.pressed.connect(func(): _toggle_max(w))
 	b_close.pressed.connect(func(): _close_window(w))
 
@@ -319,6 +322,9 @@ func _build_chrome(w: Window) -> void:
 			else:
 				w.set_meta("dragging", false)
 		elif e is InputEventMouseMotion and w.get_meta("dragging", false):
+			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				w.set_meta("dragging", false)
+				return
 			if w.get_meta("maximized", false):
 				return
 			var vis := get_viewport().get_visible_rect().size
@@ -403,8 +409,15 @@ func _close_window(w: Window) -> void:
 		tb.queue_free()
 	_windows.erase(w)
 	w.queue_free()
-	if _windows.size() > 0:
-		_windows.back().grab_focus()
+	_focus_top_visible()
+
+
+func _focus_top_visible() -> void:
+	for i in range(_windows.size() - 1, -1, -1):
+		var w: Window = _windows[i]
+		if is_instance_valid(w) and w.visible:
+			w.grab_focus()
+			return
 
 
 # ---------------------------------------------------------------- taskbar

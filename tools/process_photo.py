@@ -86,14 +86,14 @@ def digicam(img: Image.Image, rng: random.Random) -> Image.Image:
     return img.convert("RGB")
 
 
-def process(path: str, modes: list[str], seed: int) -> None:
-    os.makedirs(PROCESSED, exist_ok=True)
+def process(path: str, modes: list[str], seed: int, dest_dir: str = PROCESSED) -> None:
+    os.makedirs(dest_dir, exist_ok=True)
     stem = os.path.splitext(os.path.basename(path))[0]
     raw = Image.open(path)
     for mode in modes:
         rng = random.Random(f"{stem}:{mode}:{seed}")
         out = paper_scan(raw, rng) if mode == "scan" else digicam(raw, rng)
-        dest = os.path.join(PROCESSED, f"{stem}_{mode}.jpg")
+        dest = os.path.join(dest_dir, f"{stem}_{mode}.jpg")
         if mode == "scan":
             out.save(dest, "JPEG", quality=72)
         else:
@@ -120,11 +120,12 @@ def synth_raw(seed: int) -> Image.Image:
 
 def self_test() -> None:
     out_dir = os.path.join(ROOT, "spikes", "out")
+    proc_dir = os.path.join(out_dir, "processed")
     os.makedirs(out_dir, exist_ok=True)
     raw_path = os.path.join(out_dir, "raw_selftest.jpg")
     synth_raw(7).save(raw_path, "JPEG", quality=90)
     print("synthetic raw ->", os.path.relpath(raw_path, ROOT))
-    process(raw_path, ["scan", "digicam"], seed=3)
+    process(raw_path, ["scan", "digicam"], seed=3, dest_dir=proc_dir)
 
 
 def main() -> None:
