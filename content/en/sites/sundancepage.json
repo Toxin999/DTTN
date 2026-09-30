@@ -1,0 +1,24 @@
+{
+  "id": "sundancepage",
+  "name": "sundance_77's page",
+  "webring": {
+    "position": "site 5 of 11",
+    "prev": "site://katpage/index",
+    "next": "site://mapleweb/index"
+  },
+  "pages": {
+    "/index": {
+      "title": "sundance_77 — photo dump",
+      "blocks": [
+        {"type": "heading", "text": "sundance_77 — photo dump"},
+        {"type": "text", "text": "[color=#666666]updated 09-21-2002[/color]\n\nRandom shots from this summer. Mostly the ridge. New digicam, still figuring out the settings."},
+        {"type": "text", "text": "[i]no full-res copies here, email me if you want prints[/i]"},
+        {"type": "ring"}
+      ],
+      "keywords": [
+        {"keyword": "sundance photo", "label": "photos page owner"},
+        {"keyword": "digicam", "label": "owns the new digital camera"}
+      ]
+    }
+  }
+}

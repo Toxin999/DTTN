@@ -1,0 +1,76 @@
+{
+  "id": "katpage",
+  "name": "kat's homepage",
+  "webring": {
+    "position": "site 4 of 11",
+    "prev": "site://mapleweb/index",
+    "next": "site://sundancepage/index"
+  },
+  "pages": {
+    "/index": {
+      "title": "~*~ kat's corner ~*~",
+      "blocks": [
+        {"type": "heading", "text": "~*~ welcome to kat's corner ~*~"},
+        {"type": "text", "text": "[color=#666666]last updated 09-08-2002[/color]\n\nHi! I'm Kat. I live in Maple Grove and I spend way too much time on TrailTalk. This page is mostly trail photos and links to my friends' pages."},
+        {"type": "ring"},
+        {"type": "links", "items": [
+          {"text": "about me", "url": "site://katpage/about"},
+          {"text": "my old guestbook (archived)", "url": "site://katpage/oldguestbook"},
+          {"text": "TrailTalk forum", "url": "site://trailtalk/index"}
+        ]},
+        {"type": "text", "text": "[i]this page is best viewed in Internet Explorer 5[/i]"}
+      ],
+      "keywords": [
+        {"keyword": "kat", "label": "first name — homepage owner"},
+        {"keyword": "maple grove", "label": "town — kat lives there"}
+      ]
+    },
+    "/about": {
+      "title": "about me — kat's corner",
+      "blocks": [
+        {"type": "heading", "text": "about me"},
+        {"type": "text", "text": "22, junior at Western. I work weekends at the video store on 3rd. I drive a blue Civic (yes, the one in the TrailTalk photos).\n\nI hike Cascade Ridge almost every month — it's 40 minutes from my parents' place. If you're ever in Maple Grove, the diner next to the Safeway has the best fries in the county."},
+        {"type": "ring"},
+        {"type": "links", "items": [{"text": "‹ back to my homepage", "url": "site://katpage/index"}]}
+      ],
+      "sets_flags": ["kat_about_read"],
+      "keywords": [
+        {"keyword": "blue civic", "label": "kat's car — matches the trailhead lot"},
+        {"keyword": "video store", "label": "kat's weekend job"},
+        {"keyword": "cascade ridge", "label": "her usual hike"}
+      ]
+    },
+    "/private": {
+      "title": "friends only",
+      "requires": ["kat_about_read"],
+      "blocks": [
+        {"type": "heading", "text": "friends only"},
+        {"type": "text", "text": "I made this page for the regulars from the meetups. If you know me you know the password. Don't post it anywhere.\n\nNext group hike is October. Same lot, same time — check the thread on TrailTalk. — k"},
+        {"type": "ring"},
+        {"type": "links", "items": [{"text": "‹ back to my homepage", "url": "site://katpage/index"}]}
+      ],
+      "keywords": [{"keyword": "october hike", "label": "next meetup — friends only page"}]
+    },
+    "/oldguestbook": {
+      "title": "old guestbook (archived)",
+      "deleted": true,
+      "blocks": [
+        {"type": "heading", "text": "old guestbook (archived)"},
+        {"type": "text", "text": "[color=#666666]archived by kat on 08-30-2002[/color]"}
+      ],
+      "keywords": []
+    }
+  },
+  "cache": {
+    "/oldguestbook": {
+      "title": "old guestbook (archived)",
+      "cached_at": "09-11-2002 9:14 PM",
+      "blocks": [
+        {"type": "heading", "text": "old guestbook"},
+        {"type": "text", "text": "[color=#666666]sign my guestbook! (html help from Andrea, thanks!)[/color]\n\n[b]sundance_77[/b] writes: [i]great shots from the ridge!! btw I scanned the last roll, check your mail[/i]\n[b]kat[/b] writes: [i]thanks for signing!! :)[/i]\n[b]mark_holt[/b] writes: [i]I don't like the new photos being posted publicly. take them down.[/i]\n[b]guest[/b] writes: [i]who is \"third base\" in the trailhead pic??[/i]"},
+        {"type": "text", "text": "[color=#666666]guestbook disabled 08-30-2002[/color]"}
+      ],
+      "keywords": [{"keyword": "third base", "label": "guestbook question — unexplained"}]
+    }
+  }
+}

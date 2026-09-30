@@ -10,6 +10,8 @@ var _status: Label
 var _history: Array[String] = []
 var _history_index := -1
 var _current_url := ""
+var _ring: Dictionary = {}
+var _cache_view := false
 
 
 func build() -> void:
@@ -23,6 +25,12 @@ func build() -> void:
 	back.focus_mode = Control.FOCUS_NONE
 	back.pressed.connect(back_one)
 	bar.add_child(back)
+	var cache_btn := Button.new()
+	cache_btn.text = "Cache"
+	cache_btn.focus_mode = Control.FOCUS_NONE
+	cache_btn.tooltip_text = "Temporary Internet Files"
+	cache_btn.pressed.connect(show_cache_list)
+	bar.add_child(cache_btn)
 	_status = Label.new()
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -83,6 +91,14 @@ func content_label() -> RichTextLabel:
 	return _rt
 
 
+func ring_url(direction: String) -> String:
+	return str(_ring.get(direction, ""))
+
+
+func is_cache_view() -> bool:
+	return _cache_view
+
+
 # ---------------------------------------------------------------- dial-up
 
 func _offer_dialup() -> void:
@@ -124,6 +140,13 @@ func _on_page_loaded(result: Dictionary, push_history: bool) -> void:
 			_current_url = result["url"]
 			if push_history:
 				_push_history(_current_url)
+			_cache_view = false
+			_render_page(result)
+		"cache":
+			_current_url = result["url"]
+			if push_history:
+				_push_history(_current_url)
+			_cache_view = true
 			_render_page(result)
 		"offline":
 			_show_error("Cannot find server", "You are offline. Open the browser to dial in.")
@@ -142,14 +165,40 @@ func _push_history(url: String) -> void:
 
 func _render_page(result: Dictionary) -> void:
 	var page: Dictionary = result["page"]
+	var from_cache: bool = str(result.get("status", "")) == "cache"
+	_ring = result.get("ring", {})
 	var title: String = page.get("title", result.get("site_name", "Untitled"))
+	if from_cache:
+		title = "Cached: " + title
 	if window:
 		window.update_title("%s — WEXP Browser" % title)
-	_status.text = result.get("url", "")
-	_rt.text = _render_blocks(page.get("blocks", []))
+	_status.text = "Cached: %s" % result.get("original_url", "") if from_cache else str(result.get("url", ""))
+	for flag in page.get("sets_flags", []):
+		Flags.set_flag(str(flag))
+	var body := _render_blocks(page.get("blocks", []), _ring)
+	if from_cache:
+		body = "[i][color=#666666]Cached copy of %s — saved %s[/color][/i]\n\n%s" % [
+			result.get("original_url", ""), result.get("cached_at", "unknown"), body]
+	_rt.text = body
 	for kw in page.get("keywords", []):
 		Flags.collect_keyword(kw.get("keyword", ""), result.get("url", ""), kw.get("label", ""))
 	Flags.set_flag("visited:" + str(result.get("site", "")))
+
+
+## Internal page: everything currently recoverable from the cache.
+func show_cache_list() -> void:
+	_cache_view = false
+	var urls := NetSim.all_cache_urls()
+	var lines: Array[String] = ["[b]WEXP Browser — Temporary Internet Files[/b]", ""]
+	if urls.is_empty():
+		lines.append("The cache is empty. Browse a few pages first.")
+	else:
+		for url in urls:
+			lines.append(UiTheme.link(url, url))
+	_status.text = "cache://"
+	if window:
+		window.update_title("Temporary Internet Files — WEXP Browser")
+	_rt.text = "\n".join(lines)
 
 
 func _show_error(title: String, detail: String) -> void:
@@ -159,7 +208,7 @@ func _show_error(title: String, detail: String) -> void:
 		window.update_title("Cannot find server — WEXP Browser")
 
 
-func _render_blocks(blocks: Array) -> String:
+func _render_blocks(blocks: Array, ring: Dictionary) -> String:
 	var parts: Array[String] = []
 	for block in blocks:
 		match str(block.get("type", "")):
@@ -172,11 +221,27 @@ func _render_blocks(blocks: Array) -> String:
 				for item in block.get("items", []):
 					lines.append(UiTheme.link(str(item.get("url", "")), str(item.get("text", ""))))
 				parts.append("\n".join(lines))
+			"ring":
+				var nav := _render_ring(ring)
+				if not nav.is_empty():
+					parts.append(nav)
 			"rule":
 				parts.append("[hr]")
 			_:
 				push_warning("browser: unknown block type " + str(block.get("type", "")))
 	return "\n\n".join(parts)
+
+
+func _render_ring(ring: Dictionary) -> String:
+	if ring.is_empty():
+		return ""
+	var nav: Array[String] = []
+	if ring.has("prev"):
+		nav.append(UiTheme.link(str(ring["prev"]), "◀ prev site"))
+	nav.append("[i]%s[/i]" % str(ring.get("position", "WebRing")))
+	if ring.has("next"):
+		nav.append(UiTheme.link(str(ring["next"]), "next site ▶"))
+	return "[center]%s[/center]" % "   ·   ".join(nav)
 
 
 func _on_meta_clicked(meta: Variant) -> void:

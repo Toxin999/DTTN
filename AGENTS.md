@@ -22,6 +22,18 @@ Selftests print `SELFTEST ... (expect ...)` lines and save PNGs to
 `spikes/out/` (git-ignored). Captures are the acceptance evidence — read them.
 Dev captures disable `OS.low_processor_usage_mode` so redraws always happen.
 
+## Content format (`content/en/sites/*.json`)
+
+- Per page: `title`, `blocks` (heading/text/links/ring/rule), `keywords`
+  (auto-collected into Flags when rendered), optional `requires` (flags that
+  must be set, otherwise 404), `sets_flags` (set when the page is read),
+  `deleted: true` (always 404).
+- `cache: {"/path": {...page...}}` = authored snapshot, reachable via
+  `cache://<site>/<path>`; visited pages are also cached at runtime.
+- `webring: {position, prev, next}` + a `ring` block renders the nav bar.
+- Links inside text blocks: `[url=site://x][color=#0645AD]text[/color][/url]`
+  (RichTextLabel underlines urls itself).
+
 ## Hard-won gotchas
 
 - Embedded subwindows (`Window` nodes) render above **every** CanvasLayer.

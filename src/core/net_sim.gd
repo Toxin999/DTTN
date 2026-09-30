@@ -3,6 +3,8 @@ extends Node
 ## Fake network. Autoload: NetSim.
 ## Pure lookup + request simulation (latency, offline/not-found). Which page
 ## version is visible is decided by Flags — NetSim only answers questions.
+## Cached copies: pages the player has visited plus authored snapshots
+## (site JSON "cache" section), reachable via cache://<site>/<path>.
 
 signal online_changed(online: bool)
 
@@ -11,6 +13,7 @@ const SITES_DIR := "res://content/en/sites"
 
 var _sites: Dictionary = {}
 var _online := false
+var _visited: Dictionary = {}  # url -> snapshot
 
 
 func _ready() -> void:
@@ -62,6 +65,8 @@ func request(url: String, on_done: Callable) -> void:
 
 
 func resolve(url: String) -> Dictionary:
+	if url.begins_with("cache://"):
+		return _resolve_cache(url)
 	if not _online:
 		return {"status": "offline", "url": url}
 	var parsed := parse_url(url)
@@ -73,16 +78,83 @@ func resolve(url: String) -> Dictionary:
 	if not pages.has(path):
 		return {"status": "not_found", "url": url, "site": parsed["site"]}
 	var page: Dictionary = pages[path]
+	if page.get("deleted", false):
+		return {"status": "not_found", "url": url, "site": parsed["site"]}
 	for flag in page.get("requires", []):
 		if not Flags.has(flag):
 			return {"status": "not_found", "url": url, "site": parsed["site"]}
-	return {
+	var result := {
 		"status": "ok",
 		"url": url,
 		"site": parsed["site"],
 		"site_name": site.get("name", parsed["site"]),
 		"page": page,
+		"ring": site.get("webring", {}),
 	}
+	if not _visited.has(url):
+		_visited[url] = {
+			"page": page,
+			"site": parsed["site"],
+			"site_name": site.get("name", parsed["site"]),
+			"at": WorldClock.datetime_string(),
+		}
+	return result
+
+
+## Snapshot of a page as the player last saw it, or an authored snapshot.
+func _resolve_cache(url: String) -> Dictionary:
+	var original := "site://" + url.trim_prefix("cache://")
+	var parsed := parse_url(original)
+	if parsed.is_empty():
+		return {"status": "not_found", "url": url}
+	var snapshot: Dictionary = {}
+	var cached_at := ""
+	if _visited.has(original):
+		snapshot = _visited[original]
+		cached_at = snapshot.get("at", "")
+	elif _sites.has(parsed["site"]):
+		var site: Dictionary = _sites[parsed["site"]]
+		var entry: Variant = site.get("cache", {}).get(parsed["path"], null)
+		if entry is Dictionary:
+			snapshot = {
+				"page": entry,
+				"site": parsed["site"],
+				"site_name": site.get("name", parsed["site"]),
+				"at": entry.get("cached_at", "unknown date"),
+			}
+			cached_at = snapshot["at"]
+	if snapshot.is_empty():
+		return {"status": "not_found", "url": url}
+	return {
+		"status": "cache",
+		"url": url,
+		"original_url": original,
+		"cached_at": cached_at,
+		"site": snapshot.get("site", parsed["site"]),
+		"site_name": snapshot.get("site_name", parsed["site"]),
+		"page": snapshot["page"],
+		"ring": {},
+	}
+
+
+## All cache:// urls that resolve: visited pages + authored snapshots.
+func all_cache_urls() -> Array:
+	var urls: Dictionary = {}
+	for url in _visited.keys():
+		urls["cache://" + str(url).trim_prefix("site://")] = true
+	for site_id in _sites.keys():
+		var site: Dictionary = _sites[site_id]
+		for path in site.get("cache", {}).keys():
+			urls["cache://%s%s" % [site_id, path]] = true
+	var out := urls.keys()
+	out.sort()
+	return out
+
+
+func visited_urls() -> Array:
+	var out := _visited.keys()
+	out.sort()
+	return out
 
 
 static func parse_url(url: String) -> Dictionary:
