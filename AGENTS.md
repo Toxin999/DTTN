@@ -8,8 +8,9 @@ logs, and light hacking minigames. Godot 4.6, 2D/UI only, GL Compatibility.
 
 ```
 Godot --path .                                             # boot -> desktop
+./tools/run_tests.sh                                       # all selftests
 Godot --path . --quit-after 700  res://spikes/shell/boot_selftest.tscn
-Godot --path . --quit-after 1200 res://spikes/shell/shell_selftest.tscn
+Godot --path . --quit-after 1400 res://spikes/shell/shell_selftest.tscn
 Godot --path .                   res://spikes/text/spike_text.tscn
 python3 tools/gen_ui_assets.py                             # regenerate UI art
 python3 tools/process_photo.py --self-test                 # photo pipeline

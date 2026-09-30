@@ -11,9 +11,21 @@ var hint_level := 1
 var text_speed := 1.0
 var user_name := "WEXP User"
 
+var _save_timer: Timer
+
 
 func _ready() -> void:
+	_save_timer = Timer.new()
+	_save_timer.one_shot = true
+	_save_timer.wait_time = 0.6
+	_save_timer.timeout.connect(save_settings)
+	add_child(_save_timer)
 	load_settings()
+
+
+func _exit_tree() -> void:
+	if _save_timer and _save_timer.time_left > 0.0:
+		save_settings()
 
 
 func load_settings() -> void:
@@ -38,4 +50,5 @@ func save_settings() -> void:
 func set_value(key: String, value: Variant) -> void:
 	set(key, value)
 	changed.emit(key, value)
-	save_settings()
+	# Debounced: sliders would otherwise rewrite the cfg on every tick.
+	_save_timer.start()

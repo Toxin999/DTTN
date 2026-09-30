@@ -5,8 +5,6 @@ extends Node
 ## The taskbar and the start menu must be embedded Windows, not Controls:
 ## subwindows always draw above every CanvasLayer (Phase 0 finding).
 
-const TASKBAR_H := 34
-
 const APP_REGISTRY := {
 	"browser": {
 		"title": "TrailTalk — WEXP Browser",
@@ -48,11 +46,12 @@ func setup(host: Control, shell_theme: Theme) -> void:
 	add_child(_start_menu)
 	_start_menu.setup(_theme)
 	_start_menu.item_chosen.connect(_on_menu_item)
+	_start_menu.close_requested.connect(close_start_menu)
 
-	_host.get_viewport().size_changed.connect(_on_viewport_resize)
+	_host.get_viewport().size_changed.connect(handle_viewport_resize)
 	WorldClock.minute_passed.connect(_on_minute_passed)
 	_update_clock()
-	_on_viewport_resize()
+	handle_viewport_resize()
 
 
 # ---------------------------------------------------------------- apps
@@ -120,7 +119,7 @@ func toggle_maximize(w: WexpWindow) -> void:
 		w.set_meta("saved_pos", w.position)
 		w.set_meta("saved_size", w.size)
 		w.position = Vector2i.ZERO
-		w.size = Vector2i(int(vis.x), int(vis.y) - TASKBAR_H)
+		w.size = Vector2i(int(vis.x), int(vis.y) - Taskbar.BAR_H)
 		w.set_meta("maximized", true)
 
 
@@ -138,8 +137,8 @@ func _next_position(win_size: Vector2i) -> Vector2i:
 	var vis := _host.get_viewport().get_visible_rect().size
 	if pos.x + win_size.x > vis.x:
 		pos.x = maxi(0, int(vis.x) - win_size.x - 20)
-	if pos.y + win_size.y > vis.y - TASKBAR_H:
-		pos.y = maxi(0, int(vis.y) - TASKBAR_H - win_size.y - 20)
+	if pos.y + win_size.y > vis.y - Taskbar.BAR_H:
+		pos.y = maxi(0, int(vis.y) - Taskbar.BAR_H - win_size.y - 20)
 	return pos
 
 
@@ -172,6 +171,7 @@ func close_start_menu() -> void:
 	_taskbar.set_start_active(false)
 	if is_instance_valid(_last_active) and _last_active.visible:
 		_last_active.grab_focus()
+	_restack_overlays()
 
 
 func start_menu_open() -> bool:
@@ -194,6 +194,7 @@ func _on_menu_item(action: String) -> void:
 func _on_taskbar_button(w: WexpWindow) -> void:
 	if not is_instance_valid(w):
 		return
+	close_start_menu()
 	if not w.visible:
 		w.visible = true
 		w.grab_focus()
@@ -226,7 +227,7 @@ func quit_game() -> void:
 	get_tree().quit()
 
 
-func _on_viewport_resize() -> void:
+func handle_viewport_resize() -> void:
 	var vis := _host.get_viewport().get_visible_rect().size
 	_taskbar.reposition(vis)
 	if _start_menu.is_open():
@@ -234,13 +235,13 @@ func _on_viewport_resize() -> void:
 	for w in _windows:
 		if not is_instance_valid(w):
 			continue
-		w.size = Vector2i(mini(w.size.x, int(vis.x)), mini(w.size.y, int(vis.y) - TASKBAR_H))
+		w.size = Vector2i(mini(w.size.x, int(vis.x)), mini(w.size.y, int(vis.y) - Taskbar.BAR_H))
 		if w.get_meta("maximized", false):
-			w.size = Vector2i(int(vis.x), int(vis.y) - TASKBAR_H)
+			w.size = Vector2i(int(vis.x), int(vis.y) - Taskbar.BAR_H)
 		else:
 			var np: Vector2 = Vector2(w.position)
 			np.x = clampf(np.x, -w.size.x + 90.0, maxf(0.0, vis.x - 60.0))
-			np.y = clampf(np.y, 0.0, maxf(0.0, vis.y - TASKBAR_H - WexpWindow.TITLE_H))
+			np.y = clampf(np.y, 0.0, maxf(0.0, vis.y - Taskbar.BAR_H - WexpWindow.TITLE_H))
 			w.position = Vector2i(np)
 	_restack_overlays()
 
@@ -276,3 +277,11 @@ func taskbar_start_center() -> Vector2:
 
 func start_menu_item_center(action: String) -> Vector2:
 	return _start_menu.item_center(action)
+
+
+func chrome_button_center(w: WexpWindow, glyph: String) -> Vector2:
+	return w.button_center(glyph)
+
+
+func start_button_active() -> bool:
+	return _taskbar.start_is_active()

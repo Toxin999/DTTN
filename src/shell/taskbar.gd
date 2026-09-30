@@ -13,6 +13,7 @@ var _task_hbox: HBoxContainer
 var _clock: Label
 var _start: TextureButton
 var _buttons: Dictionary = {}
+var _start_active := false
 
 
 func setup(win_theme: Theme) -> void:
@@ -34,7 +35,12 @@ func set_clock(text: String) -> void:
 
 
 func set_start_active(active: bool) -> void:
+	_start_active = active
 	_start.texture_normal = _tex("start_%s.png" % ("pressed" if active else "normal"))
+
+
+func start_is_active() -> bool:
+	return _start_active
 
 
 func add_window_button(win: WexpWindow) -> void:
@@ -70,7 +76,7 @@ func remove_window_button(win: WexpWindow) -> void:
 func sync_button(win: WexpWindow) -> void:
 	var tb: Button = _buttons.get(win)
 	if tb:
-		tb.button_pressed = win.visible and win.has_focus()
+		tb.button_pressed = win.visible and win.is_active()
 
 
 func button_center(win: WexpWindow) -> Vector2:

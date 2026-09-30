@@ -12,7 +12,6 @@ signal drag_finished
 
 const TITLE_H := 30
 const CAP_W := 30
-const TASKBAR_H := 34
 
 static var _cache: Dictionary = {}
 
@@ -49,6 +48,17 @@ func setup(p_app_id: String, title: String, win_size: Vector2i, win_pos: Vector2
 
 func content_parent() -> Control:
 	return _client
+
+
+func is_active() -> bool:
+	return _active
+
+
+func button_center(glyph: String) -> Vector2:
+	var btn: TextureButton = get_meta("btn_" + glyph, null)
+	if btn == null:
+		return Vector2.ZERO
+	return Vector2(position) + btn.get_global_rect().get_center()
 
 
 func set_active(active: bool) -> void:
@@ -159,6 +169,9 @@ func _build_chrome() -> void:
 	b_min.pressed.connect(func(): minimize_requested.emit())
 	b_max.pressed.connect(func(): maximize_requested.emit())
 	b_close.pressed.connect(func(): close_requested.emit())
+	set_meta("btn_min", b_min)
+	set_meta("btn_max", b_max)
+	set_meta("btn_close", b_close)
 
 	_bar.gui_input.connect(_on_bar_input)
 
@@ -212,5 +225,5 @@ func _on_bar_input(event: InputEvent) -> void:
 		var vis := _host_size()
 		var np: Vector2 = Vector2(position) + event.relative
 		np.x = clampf(np.x, -size.x + 90.0, vis.x - 60.0)
-		np.y = clampf(np.y, 0.0, vis.y - TASKBAR_H - TITLE_H)
+		np.y = clampf(np.y, 0.0, vis.y - Taskbar.BAR_H - TITLE_H)
 		position = Vector2i(np)

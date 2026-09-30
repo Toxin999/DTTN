@@ -3,6 +3,7 @@ extends Window
 
 ## Overlay window (subwindows draw above app windows; the manager stacks it
 ## above the taskbar while open).
+## Close intents use Window's built-in close_requested signal.
 
 signal item_chosen(action: String)
 
@@ -50,7 +51,7 @@ func item_center(action: String) -> Vector2:
 
 func _on_panel_input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed("ui_cancel"):
-		close_menu()
+		close_requested.emit()
 		get_viewport().set_input_as_handled()
 
 
