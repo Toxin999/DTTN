@@ -1,5 +1,11 @@
 extends Control
 
+## Entry point: play the WEXP boot sequence, then load the desktop shell.
+
+const DESKTOP := "res://src/shell/desktop.tscn"
+
 
 func _ready() -> void:
-	$Placeholder.text = "DetectiveNet — scaffold (Phase 0)\nRun a spike scene directly, e.g.:\nGodot --path . res://spikes/theme/spike_theme.tscn"
+	var boot := BootScreen.new()
+	add_child(boot)
+	boot.finished.connect(func(): get_tree().change_scene_to_file(DESKTOP))

@@ -17,6 +17,11 @@ run/low_processor_mode=true
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+Settings="*res://src/core/settings.gd"
+WorldClock="*res://src/core/world_clock.gd"
+
 [display]
 
 window/size/viewport_width=1280
