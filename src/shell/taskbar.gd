@@ -43,6 +43,14 @@ func start_is_active() -> bool:
 	return _start_active
 
 
+## Called for mouse presses on the bar (see InputGuard) — used by the manager
+## to pull focus back to an exclusive dialog.
+func set_press_hook(callback: Callable) -> void:
+	var guard := InputGuard.new()
+	guard.on_press = callback
+	add_child(guard)
+
+
 func add_window_button(win: WexpWindow) -> void:
 	var tb := Button.new()
 	tb.text = win.display_title

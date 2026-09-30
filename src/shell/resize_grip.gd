@@ -13,9 +13,19 @@ func _ready() -> void:
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and target and (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
-		var ns: Vector2 = (Vector2(target.size) + event.relative).clamp(Vector2(320, 200), Vector2(2400, 2000))
+		var ns: Vector2 = (Vector2(target.size) + event.relative).clamp(Vector2(320, 200), _max_size())
 		target.size = Vector2i(ns)
 		accept_event()
+
+
+func _max_size() -> Vector2:
+	if target:
+		var parent := target.get_parent()
+		if parent:
+			var vp := parent.get_viewport()
+			if vp:
+				return vp.get_visible_rect().size
+	return Vector2(2400, 2000)
 
 
 func _draw() -> void:

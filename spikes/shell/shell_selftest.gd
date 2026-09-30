@@ -140,6 +140,50 @@ func _run() -> void:
 		" focused ", settings_win.has_focus() if settings_win else false)
 	await _shot("shell_settings")
 
+	# dialog layer: modal stacks above overlays and blocks app windows
+	var dlg := Window.new()
+	dlg.borderless = true
+	dlg.unresizable = true
+	dlg.size = Vector2i(430, 150)
+	dlg.position = Vector2i(430, 600)
+	var dpanel := PanelContainer.new()
+	dpanel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dsb := StyleBoxFlat.new()
+	dsb.bg_color = Color(0.93, 0.91, 0.85)
+	dsb.border_color = Color(0.1, 0.25, 0.6)
+	dsb.set_border_width_all(2)
+	dpanel.add_theme_stylebox_override("panel", dsb)
+	var dlbl := Label.new()
+	dlbl.text = "Connecting to TrailTalk...\n56k dial-up"
+	dlbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	dlbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	dpanel.add_child(dlbl)
+	dlg.add_child(dpanel)
+	_mgr.open_dialog(dlg)
+	await _wait(0.25)
+	print("SELFTEST dialog -> count ", _mgr.dialog_count(),
+		" focused ", dlg.has_focus(), " (expect 1 true)")
+	await _shot("shell_dialog")
+
+	var probe := Vector2(settings_win.position) + Vector2(200, 15)
+	_press(probe)
+	_release(probe)
+	await _wait(0.2)
+	print("SELFTEST dialog modal -> dialog focused ", dlg.has_focus(),
+		" settings focused ", settings_win.has_focus(), " (expect true false)")
+
+	var tb_btn := _mgr.taskbar_button_center(browser)
+	_press(tb_btn)
+	_release(tb_btn)
+	await _wait(0.25)
+	print("SELFTEST dialog blocks taskbar -> dialog focused ", dlg.has_focus(),
+		" browser visible ", browser.visible, " (expect true true)")
+
+	_mgr.close_dialog(dlg)
+	await _wait(0.25)
+	print("SELFTEST dialog closed -> count ", _mgr.dialog_count(),
+		" settings focused ", settings_win.has_focus(), " (expect 0 true)")
+
 	# viewport resize clamp (position/size pulled back into the work area)
 	browser.position = Vector2i(3000, 3000)
 	browser.size = Vector2i(2000, 1500)

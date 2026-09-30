@@ -6,23 +6,37 @@ set -u
 GODOT="${GODOT:-/Applications/Godot.app/Contents/MacOS/Godot}"
 cd "$(dirname "$0")/.."
 
+# ripgrep if available, plain grep otherwise
+if command -v rg >/dev/null 2>&1; then
+    show() { rg "CAPTURED|SELFTEST"; }
+    errors() { rg "SCRIPT ERROR|Parse Error|Failed to load|Invalid call|Nonexistent function"; }
+    any_error() { rg -q "SCRIPT ERROR|Parse Error|Failed to load|Invalid call|Nonexistent function"; }
+else
+    show() { grep -E "CAPTURED|SELFTEST"; }
+    errors() { grep -E "SCRIPT ERROR|Parse Error|Failed to load|Invalid call|Nonexistent function"; }
+    any_error() { grep -Eq "SCRIPT ERROR|Parse Error|Failed to load|Invalid call|Nonexistent function"; }
+fi
+
 fail=0
+
+echo "== import"
+"$GODOT" --headless --path . --import >/dev/null 2>&1
 
 run_godot() {
     local label="$1" args="$2"
     echo "== $label"
     local out
     out=$("$GODOT" --path . $args 2>&1)
-    echo "$out" | rg "CAPTURED|SELFTEST" || true
-    if echo "$out" | rg -q "SCRIPT ERROR|Parse Error|Failed to load|Invalid call|Nonexistent function"; then
+    echo "$out" | show || true
+    if echo "$out" | any_error; then
         echo "!! errors in $label:"
-        echo "$out" | rg "SCRIPT ERROR|Parse Error|Failed to load|Invalid call|Nonexistent function" | head -10
+        echo "$out" | errors | head -10
         fail=1
     fi
 }
 
 run_godot "boot"  "--quit-after 700 res://spikes/shell/boot_selftest.tscn"
-run_godot "shell" "--quit-after 1400 res://spikes/shell/shell_selftest.tscn"
+run_godot "shell" "--quit-after 1600 res://spikes/shell/shell_selftest.tscn"
 run_godot "text"  "--quit-after 600 res://spikes/text/spike_text.tscn"
 
 echo "== photo"

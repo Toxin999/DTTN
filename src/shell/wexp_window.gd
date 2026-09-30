@@ -8,7 +8,6 @@ extends Window
 
 signal minimize_requested
 signal maximize_requested
-signal drag_finished
 
 const TITLE_H := 30
 const CAP_W := 30
@@ -17,6 +16,8 @@ static var _cache: Dictionary = {}
 
 var app_id := ""
 var display_title := ""
+## The AppBase instance shown inside this window (null for plain windows).
+var app: AppBase
 
 var _bar: Control
 var _cap_c: TextureRect
@@ -24,6 +25,7 @@ var _cap_l: TextureRect
 var _cap_r: TextureRect
 var _label: Label
 var _client: PanelContainer
+var _blocker: ColorRect
 var _active := true
 
 
@@ -52,6 +54,15 @@ func content_parent() -> Control:
 
 func is_active() -> bool:
 	return _active
+
+
+## Modal input guard: dims the window and swallows mouse input while a
+## dialog is open (Window.exclusive does not block embedded subwindows).
+func set_input_blocked(blocked: bool) -> void:
+	if not _blocker:
+		return
+	_blocker.mouse_filter = Control.MOUSE_FILTER_STOP if blocked else Control.MOUSE_FILTER_IGNORE
+	_blocker.color = Color(0, 0, 0, 0.18) if blocked else Color(0, 0, 0, 0)
 
 
 func button_center(glyph: String) -> Vector2:
@@ -192,6 +203,12 @@ func _build_chrome() -> void:
 	grip.offset_top = -16.0
 	add_child(grip)
 
+	_blocker = ColorRect.new()
+	_blocker.color = Color(0, 0, 0, 0)
+	_blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_blocker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_blocker)
+
 	set_active(_active)
 
 
@@ -214,11 +231,9 @@ func _on_bar_input(event: InputEvent) -> void:
 			grab_focus()
 		else:
 			set_meta("dragging", false)
-			drag_finished.emit()
 	elif event is InputEventMouseMotion and get_meta("dragging", false):
 		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			set_meta("dragging", false)
-			drag_finished.emit()
 			return
 		if get_meta("maximized", false):
 			return

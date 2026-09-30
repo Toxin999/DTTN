@@ -17,10 +17,6 @@ func _ready() -> void:
 	_manager.setup(self, theme)
 
 
-func manager() -> WindowManager:
-	return _manager
-
-
 func _build_wallpaper() -> void:
 	var bg := TextureRect.new()
 	bg.texture = load(WALLPAPER)
@@ -37,6 +33,8 @@ func _build_click_catcher() -> void:
 	catcher.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	catcher.mouse_filter = Control.MOUSE_FILTER_STOP
 	catcher.gui_input.connect(func(_e: InputEvent):
-		if _manager and _manager.start_menu_open():
-			_manager.close_start_menu())
+		if _manager.start_menu_open():
+			_manager.close_start_menu()
+		else:
+			_manager.notify_background_click())
 	add_child(catcher)

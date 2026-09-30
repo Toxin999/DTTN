@@ -28,6 +28,8 @@ var _theme: Theme
 var _taskbar: Taskbar
 var _start_menu: StartMenu
 var _windows: Array[WexpWindow] = []
+var _dialogs: Array[Window] = []
+var _modal: Window
 var _cascade := 0
 var _last_active: WexpWindow
 
@@ -41,6 +43,7 @@ func setup(host: Control, shell_theme: Theme) -> void:
 	_taskbar.setup(_theme)
 	_taskbar.start_pressed.connect(toggle_start_menu)
 	_taskbar.window_button_pressed.connect(_on_taskbar_button)
+	_taskbar.set_press_hook(_regrab_modal_deferred)
 
 	_start_menu = StartMenu.new()
 	add_child(_start_menu)
@@ -57,6 +60,8 @@ func setup(host: Control, shell_theme: Theme) -> void:
 # ---------------------------------------------------------------- apps
 
 func open_app(app_id: String) -> WexpWindow:
+	if is_instance_valid(_modal):
+		return null
 	if not APP_REGISTRY.has(app_id):
 		push_error("WindowManager: unknown app '%s'" % app_id)
 		return null
@@ -78,6 +83,8 @@ func open_app(app_id: String) -> WexpWindow:
 	w.content_parent().add_child(app)
 	if app.has_method("build"):
 		app.call("build")
+	if app is AppBase:
+		w.app = app
 
 	w.close_requested.connect(func(): close_window(w))
 	w.minimize_requested.connect(func(): minimize_window(w))
@@ -89,6 +96,10 @@ func open_app(app_id: String) -> WexpWindow:
 
 	_taskbar.add_window_button(w)
 	w.grab_focus()
+	if w.has_focus():
+		# Embedded windows auto-focus on add, which emits focus_entered
+		# before our handler is connected — sync the state explicitly.
+		_on_window_focus(w)
 	_restack_overlays()
 	return w
 
@@ -96,6 +107,8 @@ func open_app(app_id: String) -> WexpWindow:
 func close_window(w: WexpWindow) -> void:
 	if not is_instance_valid(w):
 		return
+	if w == _last_active:
+		_last_active = null
 	_taskbar.remove_window_button(w)
 	_windows.erase(w)
 	w.queue_free()
@@ -143,6 +156,9 @@ func _next_position(win_size: Vector2i) -> Vector2i:
 
 
 func _on_window_focus(w: WexpWindow) -> void:
+	if is_instance_valid(_modal) and w != _modal:
+		_modal.grab_focus()
+		return
 	_last_active = w
 	for other in _windows:
 		if is_instance_valid(other):
@@ -156,6 +172,8 @@ func _on_window_focus(w: WexpWindow) -> void:
 # ---------------------------------------------------------------- start menu
 
 func toggle_start_menu() -> void:
+	if is_instance_valid(_modal):
+		return
 	if _start_menu.is_open():
 		close_start_menu()
 	else:
@@ -189,10 +207,76 @@ func _on_menu_item(action: String) -> void:
 		open_app(app_id)
 
 
+# ---------------------------------------------------------------- dialogs
+
+## Dialogs stack above the taskbar and start menu, and block mouse input to
+## app windows while open (embedded subwindows ignore Window.exclusive, so
+## blocking is done with per-window input blockers).
+## The caller creates the window (content included) but must not add it.
+func open_dialog(dialog: Window, modal := true) -> Window:
+	dialog.theme = _theme
+	dialog.exclusive = modal
+	add_child(dialog)
+	_dialogs.append(dialog)
+	dialog.close_requested.connect(func(): close_dialog(dialog))
+	if modal:
+		_modal = dialog
+		_set_windows_blocked(true)
+	dialog.grab_focus()
+	_restack_overlays()
+	return dialog
+
+
+func close_dialog(dialog: Window) -> void:
+	if not is_instance_valid(dialog):
+		return
+	_dialogs.erase(dialog)
+	if _modal == dialog:
+		_modal = null
+		_set_windows_blocked(false)
+	dialog.exclusive = false
+	dialog.queue_free()
+	_restack_overlays()
+	_restore_active_focus()
+
+
+func _restore_active_focus() -> void:
+	# Focus can only move once the exclusive dialog has left the tree.
+	await get_tree().process_frame
+	if is_instance_valid(_last_active) and _last_active.visible:
+		_last_active.grab_focus()
+
+
+func _set_windows_blocked(blocked: bool) -> void:
+	for w in _windows:
+		if is_instance_valid(w):
+			w.set_input_blocked(blocked)
+
+
+## Clicks on the desktop background also steal subwindow focus from a modal.
+func notify_background_click() -> void:
+	_regrab_modal_deferred()
+
+
+func _regrab_modal_deferred() -> void:
+	if not is_instance_valid(_modal):
+		return
+	# Focus transitions land a frame (or two) after the click.
+	await get_tree().create_timer(0.05).timeout
+	if is_instance_valid(_modal) and not _modal.has_focus():
+		_modal.grab_focus()
+
+
+func dialog_count() -> int:
+	return _dialogs.size()
+
+
 # ---------------------------------------------------------------- taskbar
 
 func _on_taskbar_button(w: WexpWindow) -> void:
 	if not is_instance_valid(w):
+		return
+	if is_instance_valid(_modal):
 		return
 	close_start_menu()
 	if not w.visible:
@@ -211,6 +295,9 @@ func _restack_overlays() -> void:
 		move_child(_taskbar, -1)
 	if _start_menu.is_open() and _start_menu.get_index() != get_child_count() - 1:
 		move_child(_start_menu, -1)
+	for d in _dialogs:
+		if is_instance_valid(d) and d.get_index() != get_child_count() - 1:
+			move_child(d, -1)
 
 
 # ---------------------------------------------------------------- shell
@@ -220,6 +307,10 @@ func quit_game() -> void:
 		if is_instance_valid(w):
 			w.queue_free()
 	_windows.clear()
+	for d in _dialogs.duplicate():
+		if is_instance_valid(d):
+			d.queue_free()
+	_dialogs.clear()
 	_start_menu.queue_free()
 	_taskbar.queue_free()
 	await get_tree().process_frame
@@ -265,6 +356,11 @@ func find_window(app_id: String) -> WexpWindow:
 		if is_instance_valid(w) and w.app_id == app_id:
 			return w
 	return null
+
+
+func find_app(app_id: String) -> AppBase:
+	var w := find_window(app_id)
+	return w.app if w else null
 
 
 func taskbar_button_center(w: WexpWindow) -> Vector2:

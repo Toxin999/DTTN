@@ -13,6 +13,13 @@ const TEXT := Color(0.08, 0.08, 0.08)
 const MUTED := Color(0.38, 0.38, 0.38)
 const CLIENT_BG := Color(0.925, 0.91, 0.847)
 const CLIENT_BORDER := Color(0.13, 0.32, 0.69)
+## Era link blue. RichTextLabel has no link_color theme item in Godot 4.6,
+## so content authors wrap links with UiTheme.link().
+const LINK_COLOR := "#0645AD"
+
+
+static func link(url: String, text: String) -> String:
+	return "[url=%s][color=%s][u]%s[/u][/color][/url]" % [url, LINK_COLOR, text]
 
 
 static func regular() -> FontFile:

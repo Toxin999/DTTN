@@ -31,6 +31,14 @@ Dev captures disable `OS.low_processor_usage_mode` so redraws always happen.
 - `Window.position` / `Window.size` are `Vector2i` — convert explicitly.
 - Themes do **not** propagate into embedded windows; assign the shared theme
   to each Window (`WindowManager` does this via `UiTheme.build()`).
+- `Window.exclusive` does **not** block input to sibling embedded subwindows.
+  Modality is implemented in `WindowManager.open_dialog`: per-window input
+  blockers (`WexpWindow.set_input_blocked`) + `InputGuard` overlays that pull
+  focus back after taskbar/desktop clicks.
+- A new embedded Window auto-focuses during `add_child`, *before* signals can
+  be connected — sync focus state explicitly after creating windows.
+- `RichTextLabel` has no `link_color` theme item in 4.6; wrap links with
+  `UiTheme.link(url, text)` for era-styled blue underlined links.
 - The runtime low-processor switch is `OS.low_processor_usage_mode`
   (there is no `Engine.low_processor_usage_mode` in Godot 4).
 - `Window` already defines `close_requested`; don't redeclare it. Avoid
