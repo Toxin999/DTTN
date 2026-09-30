@@ -1,0 +1,11 @@
+# Godot
+.godot/
+android/
+ios/
+export/
+export_presets.cfg
+
+# Artifacts / junk
+.DS_Store
+spikes/out/
+*.tmp
