@@ -4,6 +4,7 @@
 set -u
 
 GODOT="${GODOT:-/Applications/Godot.app/Contents/MacOS/Godot}"
+PYTHON="${PYTHON:-python3}"
 cd "$(dirname "$0")/.."
 
 # ripgrep if available, plain grep otherwise
@@ -40,7 +41,10 @@ run_godot "shell" "--quit-after 1600 res://spikes/shell/shell_selftest.tscn"
 run_godot "text"  "--quit-after 600 res://spikes/text/spike_text.tscn"
 
 echo "== photo"
-if ! python3 tools/process_photo.py --self-test; then
+if ! "$PYTHON" -c "import PIL" >/dev/null 2>&1; then
+    echo "!! '$PYTHON' has no Pillow — install it or set PYTHON=/path/to/python3"
+    fail=1
+elif ! "$PYTHON" tools/process_photo.py --self-test; then
     echo "!! photo self-test failed"
     fail=1
 fi
