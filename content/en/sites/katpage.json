@@ -51,6 +51,19 @@
       ],
       "keywords": [{"keyword": "october hike", "label": "next meetup — friends only page"}]
     },
+    "/secrets": {
+      "title": "friends only — photos",
+      "requires": ["cracked:katpage"],
+      "blocks": [
+        {"type": "heading", "text": "friends only — photos"},
+        {"type": "text", "text": "[color=#666666]posted 09-16-2002[/color]\n\nOK here are the scans from the last group hike. [b]October 12[/b] is the next one, same lot, 7 AM. I'm bringing the good thermos this time.\n\nIf you're reading this you already know the password. Don't share it on the forum — mark keeps saying people take the photos."},
+        {"type": "ring"},
+        {"type": "links", "items": [{"text": "‹ back to my homepage", "url": "site://katpage/index"}]}
+      ],
+      "keywords": [
+        {"keyword": "october 12", "label": "next group hike — friends area"}
+      ]
+    },
     "/oldguestbook": {
       "title": "old guestbook (archived)",
       "deleted": true,

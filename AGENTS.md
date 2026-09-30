@@ -33,6 +33,9 @@ Dev captures disable `OS.low_processor_usage_mode` so redraws always happen.
 - `webring: {position, prev, next}` + a `ring` block renders the nav bar.
 - Links inside text blocks: `[url=site://x][color=#0645AD]text[/color][/url]`
   (RichTextLabel underlines urls itself).
+- Crack targets (`content/en/crack/targets.json`): `answer_keyword` must be a
+  keyword the player can collect by reading; `accepted` = extra literal
+  guesses; `lockout_minutes` is in in-game minutes (1 real second each).
 
 ## Hard-won gotchas
 
@@ -77,8 +80,10 @@ src/core/                 settings, world_clock, ui_theme, flags, net_sim (autol
 src/shell/                desktop, window_manager, wexp_window, taskbar, start_menu,
                           dialup_modal, input_guard
 src/apps/                 app_base + browser (dial-up gating, block renderer,
-                          navigation/history), mail, settings (placeholders)
+                          navigation/history), terminal + crack_panel (password
+                          minigame), caseboard, mail, settings
 content/en/sites/*.json   fake web pages (blocks + keywords + requires flags)
+content/en/crack/         crack minigame targets
 content/en/               narrative source (style guide lives here)
 tools/                    Pillow generators: UI art, era photo processing
 spikes/                   dev-only selftests + capture helper (spike_text kept)

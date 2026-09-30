@@ -1,0 +1,24 @@
+{
+  "katpage": {
+    "label": "katpage — friends only area",
+    "answer_keyword": "cascade ridge",
+    "accepted": ["cascaderidge", "cascade"],
+    "hints": [
+      "She hikes the same trail almost every month.",
+      "It is the name of the ridge from her own posts."
+    ],
+    "lockout_minutes": 10,
+    "reward": "Flag set: cracked:katpage. The friends-only area will open now."
+  },
+  "guestbook": {
+    "label": "old guestbook admin",
+    "answer_keyword": "third base",
+    "accepted": ["thirdbase"],
+    "hints": [
+      "A guest asked about it in the archived guestbook.",
+      "It is not a baseball term here."
+    ],
+    "lockout_minutes": 2,
+    "reward": "Flag set: cracked:guestbook."
+  }
+}

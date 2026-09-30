@@ -40,6 +40,7 @@ run_godot "boot"    "--quit-after 700 res://spikes/shell/boot_selftest.tscn"
 run_godot "shell"   "--quit-after 1600 res://spikes/shell/shell_selftest.tscn"
 run_godot "browser" "--quit-after 6000 res://spikes/shell/browser_selftest.tscn"
 run_godot "ring"    "--quit-after 6000 res://spikes/shell/ring_cache_selftest.tscn"
+run_godot "p2c"     "--quit-after 9000 res://spikes/shell/p2c_selftest.tscn"
 run_godot "text"    "--quit-after 600 res://spikes/text/spike_text.tscn"
 
 echo "== photo"

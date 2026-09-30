@@ -21,6 +21,16 @@ const APP_REGISTRY := {
 		"size": Vector2i(440, 340),
 		"script": "res://src/apps/settings_app.gd",
 	},
+	"terminal": {
+		"title": "Command Prompt",
+		"size": Vector2i(660, 440),
+		"script": "res://src/apps/terminal_app.gd",
+	},
+	"caseboard": {
+		"title": "CaseBoard — evidence notes",
+		"size": Vector2i(420, 460),
+		"script": "res://src/apps/caseboard_app.gd",
+	},
 }
 
 var _host: Control

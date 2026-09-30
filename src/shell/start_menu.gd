@@ -117,6 +117,8 @@ func _build() -> void:
 	left_wrap.add_child(left)
 	_item(left, "app:browser", "TrailTalk Browser")
 	_item(left, "app:mail", "WEXP Mail")
+	_item(left, "app:terminal", "Command Prompt")
+	_item(left, "app:caseboard", "CaseBoard")
 	_item(left, "app:settings", "Control Panel")
 
 	var right_wrap := PanelContainer.new()
